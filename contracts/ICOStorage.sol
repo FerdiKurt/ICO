@@ -5,10 +5,10 @@ import './ICOStructs.sol';
 
 contract ICOStorage is ICOStructs {
     uint public endOfICO;
-    uint public pricePerUnit;
+    uint public pricePerToken;
     uint public availableTokens;
-    uint public minPurchase;
-    uint public maxPurchase;
+    uint public purchaseLimit;
+    uint public percentage;
     bool public released;
 
     address public admin;
