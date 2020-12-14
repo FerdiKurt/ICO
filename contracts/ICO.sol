@@ -23,10 +23,10 @@ contract ICO is ICOAbstract {
 
     function start(
         uint duration,
-        uint _price,
+        uint price,
         uint _availableTokens,
-        uint _min,
-        uint _max
+        uint allowedTokens,
+        uint _percentage
     )
         external
         onlyAdmin()
@@ -39,16 +39,21 @@ contract ICO is ICOAbstract {
             'Invalid amount provided!'
         );
 
+        availableTokens = _availableTokens;
+
         require(duration > 0, 'Invalid duration provided!');
-        require(_price > 0, 'Invalid price proided!');
-        require(_min > 0, 'Min must be greater than 0!');
-        require(_max > 0 && _max < _availableTokens, 'Invalid max purchase provided!');
+        require(price > 0, 'Invalid price provided!');
+
+        require(_percentage <= 50, 'Invalid percentage rate is given!');
+        percentage = _percentage;
+        require(
+            allowedTokens > 0 && allowedTokens <= ((availableTokens * percentage) / 100), 
+            'Invalid purchase limit provided!'
+        );
 
         endOfICO = duration + block.timestamp;
-        pricePerUnit = _price;
-        availableTokens = _availableTokens;
-        minPurchase = _min;
-        maxPurchase = _max;
+        pricePerToken = price;
+        purchaseLimit = allowedTokens;
     }
 
     function addToWhitelist(address investor) external onlyAdmin() override {
