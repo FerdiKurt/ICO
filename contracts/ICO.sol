@@ -55,17 +55,19 @@ contract ICO is ICOAbstract {
         investors[investor] = true;
     }
 
-    function buy() external onlyInvestors() icoActive() payable override {
-        require(msg.value % pricePerUnit == 0, 'Should be multiple of price!');
-        require(
-            msg.value >= minPurchase && msg.value <= maxPurchase,
-            'invalid msg.value() provided!'
-        );
+    function buy(uint tokensAmount) external onlyInvestors() icoActive() payable override {
+        require(tokensAmount <= availableTokens, 'Not enough tokens for sale!');
+        require(tokensAmount <= purchaseLimit, 'Invalid token amount!');
 
-        uint quantity = pricePerUnit * msg.value;
-        require(quantity <= availableTokens, 'Not enough tokens for sale!');
+        uint requiredPrice = tokensAmount * pricePerToken;
+        require(msg.value >= requiredPrice, 'Not enough ether provided!');
 
-        sales.push(Sale(msg.sender, quantity));
+        if (msg.value > requiredPrice) {
+            msg.sender.transfer(msg.value - requiredPrice);
+        }
+
+        availableTokens -= tokensAmount;
+        sales.push(Sale(msg.sender, tokensAmount));
     }
 
     function release()
