@@ -104,6 +104,13 @@ contract ICO is ICOAbstract {
         payable
         override
     {
+        uint balance = _balanceOfICO();
+        require(amount <= balance, 'Invalid ether input!');
+
         recipient.transfer(amount);
+    }
+
+    function _balanceOfICO() internal view returns(uint) {
+        return address(this).balance;
     }
 }
