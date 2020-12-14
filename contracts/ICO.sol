@@ -69,17 +69,17 @@ contract ICO is ICOAbstract {
     }
 
     function release()
-        external
         onlyAdmin()
+        external
         icoEnded()
         tokensNotReleased()
         override
     {
-        ERC20Token tokenInstance = ERC20Token(token);
+        ERC20Token erc20Token = ERC20Token(token);
 
         for (uint i = 0; i < sales.length; i++) {
             Sale storage sale = sales[i];
-            tokenInstance.transfer(sale.investor, sale.quantity);
+            erc20Token.transfer(sale.investor, sale.tokensAmount);
         }
 
         released = true;
