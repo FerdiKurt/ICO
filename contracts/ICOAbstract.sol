@@ -9,12 +9,12 @@ abstract contract ICOAbstract is ICOStorage {
     uint duration,
     uint price,
     uint availableTokens,
-    uint min,
-    uint max
+    uint allowedTokens,
+    uint percentage
     ) external virtual;
 
     function addToWhitelist(address investor) external virtual;
-    function buy() external virtual payable;  
+    function buy(uint amount) external virtual payable;  
     function release() external virtual;
     function withdraw(address payable recipient, uint amount) external virtual payable;
 
@@ -41,7 +41,7 @@ abstract contract ICOAbstract is ICOStorage {
     }
     modifier icoEnded() {
         require(
-            endOfICO > 0 && (block.timestamp > endOfICO|| availableTokens == 0),
+            endOfICO > 0 && (block.timestamp > endOfICO || availableTokens == 0),
              'ICO still active!'
         );
         _;
