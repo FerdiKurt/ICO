@@ -1,23 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.8.0;
 
-import './IERC20Token.sol';
+import "./IERC20Token.sol";
+import "./SafeMath.sol";
 
 contract ERC20Token is ERC20Interface {
+    using SafeMath for uint;
+
     string public name;
     string public symbol;
     uint8 public decimals;
     uint public _totalSupply;
 
     modifier notAllowed(address to) {
-        require(to != address(0x00), 'Zero Address Not Allowed!');
+        require(to != address(0x00), "Zero Address Not Allowed!");
         _;
     }
 
     mapping(address => uint) public balances;
     mapping(address => mapping(address => uint)) public allowed;
 
-    
     constructor(
         string memory _name,
         string memory _symbol,
@@ -28,117 +30,99 @@ contract ERC20Token is ERC20Interface {
         symbol = _symbol;
         decimals = _decimals;
         _totalSupply = _initialSupply;
-        balances[msg.sender] = _totalSupply;   
+        balances[msg.sender] = _totalSupply;
     }
-        
-    function transfer(
-        address to, 
-        uint value
-    ) 
+
+    function transfer(address _to, uint _value)
         external
-        notAllowed(to) 
         override
-        returns(bool) 
+        notAllowed(_to)
+        returns (bool)
     {
-        require(balances[msg.sender] >= value, 'token balance too low');
+        require(balances[msg.sender] >= _value, "token balance too low");
 
-        balances[msg.sender] -= value;
-        balances[to] += value;
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        balances[_to] = balances[_to].add(_value);
 
-        emit Transfer(msg.sender, to, value);
+        emit Transfer(msg.sender, _to, _value);
+
         return true;
     }
-    
+
     function transferFrom(
-        address from, 
-        address to, 
-        uint value
-    ) 
-        external 
-        notAllowed(to) 
-        override
-        returns(bool) 
-    {
-        uint allowance = allowed[from][msg.sender];
+        address _from,
+        address _to,
+        uint _value
+    ) external override notAllowed(_to) returns (bool) {
+        uint allowance = allowed[_from][msg.sender];
 
-        require(allowance >= value, 'allowance too low');
-        require(balances[from] >= value, 'token balance too low');
+        require(allowance >= _value, "allowance too low");
+        require(balances[_from] >= _value, "token balance too low");
 
-        allowed[from][msg.sender] -= value;
-        balances[from] -= value;
-        balances[to] += value;
+        balances[_from] = balances[_from].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
 
-        emit Transfer(from, to, value);
-        return true;
-    }
-    
-    function approve(
-        address spender, 
-        uint value
-    ) 
-        external 
-        notAllowed(spender) 
-        override
-        returns(bool) 
-    {
-        allowed[msg.sender][spender] = value;
-        
-        emit Approval(msg.sender, spender, value);
+        emit Transfer(_from, _to, _value);
+
         return true;
     }
 
-    function increaseApproval(
-        address spender,
-        uint256 addedValue
-    )
+    function approve(address _spender, uint _value)
         external
         override
+        notAllowed(_spender)
         returns (bool)
     {
-    allowed[msg.sender][spender] += addedValue; 
+        allowed[msg.sender][_spender] = _value;
 
-    emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
-    return true;
+        emit Approval(msg.sender, _spender, _value);
+
+        return true;
     }
 
-    function decreaseApproval(
-        address spender,
-        uint256 subtractedValue
-    )
-        external
-        override
+    function increaseApproval(address _spender, uint _addedValue)
+        public
         returns (bool)
     {
-        uint256 oldValue = allowed[msg.sender][spender];
+        allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
 
-        if (subtractedValue >= oldValue) {
-            allowed[msg.sender][spender] = 0;
+        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+
+        return true;
+    }
+
+    function decreaseApproval(address _spender, uint _subtractedValue)
+        public
+        returns (bool)
+    {
+        uint oldValue = allowed[msg.sender][_spender];
+
+        if (_subtractedValue >= oldValue) {
+            allowed[msg.sender][_spender] = 0;
         } else {
-            allowed[msg.sender][spender] = oldValue - subtractedValue;
+            allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
         }
 
-        emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
+        emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
+
         return true;
     }
-    
-    function allowance(
-        address owner,
-        address spender
-    ) 
-        external 
-        view 
+
+    function allowance(address _owner, address _spender)
+        external
+        view
         override
-        returns(uint) 
+        returns (uint)
     {
-        return allowed[owner][spender];
-    }
-    
-    function balanceOf(address owner) external view override returns(uint) {
-        return balances[owner];
+        return allowed[_owner][_spender];
     }
 
-    function totalSupply() external view override returns(uint) {
-      return _totalSupply;
+    function balanceOf(address _owner) external view override returns (uint) {
+        return balances[_owner];
+    }
+
+    function totalSupply() external view override returns (uint) {
+        return _totalSupply;
     }
 }
-
