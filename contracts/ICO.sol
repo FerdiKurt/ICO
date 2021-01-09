@@ -3,8 +3,11 @@ pragma solidity >=0.7.0 <0.8.0;
 
 import { ERC20Token }  from './ERC20Token.sol';
 import './ICOAbstract.sol';
+import "./SafeMath.sol";
 
 contract ICO is ICOAbstract { 
+    using SafeMath for uint;
+
     constructor(
         string memory _name,
         string memory _symbol,
@@ -22,10 +25,10 @@ contract ICO is ICOAbstract {
     }
 
     function start(
-        uint duration,
-        uint price,
+        uint _duration,
+        uint _price,
         uint _availableTokens,
-        uint allowedTokens,
+        uint _allowedTokens,
         uint _percentage
     )
         external
@@ -41,38 +44,38 @@ contract ICO is ICOAbstract {
 
         availableTokens = _availableTokens;
 
-        require(duration > 0, 'Invalid duration provided!');
-        require(price > 0, 'Invalid price provided!');
+        require(_duration > 0, 'Invalid duration provided!');
+        require(_price > 0, 'Invalid price provided!');
 
         require(_percentage <= 50, 'Invalid percentage rate is given!');
         percentage = _percentage;
         require(
-            allowedTokens > 0 && allowedTokens <= ((availableTokens * percentage) / 100), 
+            _allowedTokens > 0 && _allowedTokens <= ((availableTokens * percentage) / 100), 
             'Invalid purchase limit provided!'
         );
 
-        endOfICO = duration + block.timestamp;
-        pricePerToken = price;
-        purchaseLimit = allowedTokens;
+        endOfICO = _duration.add(block.timestamp);
+        pricePerToken = _price;
+        purchaseLimit = _allowedTokens;
     }
 
-    function addToWhitelist(address investor) external onlyAdmin() override {
-        investors[investor] = true;
+    function addToWhitelist(address _investor) external onlyAdmin() override {
+        investors[_investor] = true;
     }
 
-    function buy(uint tokensAmount) external onlyInvestors() icoActive() payable override {
-        require(tokensAmount <= availableTokens, 'Not enough tokens for sale!');
-        require(tokensAmount <= purchaseLimit, 'Invalid token amount!');
+    function buy(uint _tokensAmount) external onlyInvestors() icoActive() payable override {
+        require(_tokensAmount <= availableTokens, 'Not enough tokens for sale!');
+        require(_tokensAmount <= purchaseLimit, 'Invalid token amount!');
 
-        uint requiredPrice = tokensAmount * pricePerToken;
+        uint requiredPrice = _tokensAmount.mul(pricePerToken);
         require(msg.value >= requiredPrice, 'Not enough ether provided!');
 
         if (msg.value > requiredPrice) {
-            msg.sender.transfer(msg.value - requiredPrice);
+            msg.sender.transfer(msg.value.sub(requiredPrice));
         }
 
-        availableTokens -= tokensAmount;
-        sales.push(Sale(msg.sender, tokensAmount));
+        availableTokens = availableTokens.sub(_tokensAmount);
+        sales.push(Sale(msg.sender, _tokensAmount));
     }
 
     function release()
@@ -94,8 +97,8 @@ contract ICO is ICOAbstract {
 
     function withdraw
     (
-        address payable recipient,
-        uint amount
+        address payable _recipient,
+        uint _amount
     )
         external
         onlyAdmin()
@@ -105,9 +108,9 @@ contract ICO is ICOAbstract {
         override
     {
         uint balance = _balanceOfICO();
-        require(amount <= balance, 'Invalid ether input!');
+        require(_amount <= balance, 'Invalid ether input!');
 
-        recipient.transfer(amount);
+        _recipient.transfer(_amount);
     }
 
     function _balanceOfICO() internal view returns(uint) {

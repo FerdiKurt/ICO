@@ -4,7 +4,7 @@ pragma solidity >=0.7.0 <0.8.0;
 import './ICOStorage.sol';
 
 abstract contract ICOAbstract is ICOStorage {
-    // function signatures
+    // functions to be implemented
     function start(
     uint duration,
     uint price,
@@ -55,5 +55,4 @@ abstract contract ICOAbstract is ICOStorage {
         require(released == true, 'Tokens are not released yet!');
         _;
     }
-
 }
