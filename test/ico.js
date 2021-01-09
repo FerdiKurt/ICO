@@ -145,75 +145,75 @@ contract('ICO', accounts => {
         });
 
         // full process lifecycle
-        // it.only('should show full lifecycle process correctly', async () => {
-        //     const amountOfToken = await ico.availableTokens()
-        //     assert.equal(amountOfToken.toNumber(), available)
+        it.only('should show full lifecycle process correctly', async () => {
+            const amountOfToken = await ico.availableTokens()
+            assert.equal(amountOfToken.toNumber(), available)
 
-        //     await expectRevert(
-        //         ico.release( {from: admin }),
-        //         'ICO still active!'
-        //     )
+            await expectRevert(
+                ico.release( {from: admin }),
+                'ICO still active!'
+            )
 
-        //     await expectRevert(
-        //         ico.withdraw(accounts[9], 10, { from: admin }),
-        //         'ICO still active!'
-        //     )
+            await expectRevert(
+                ico.withdraw(accounts[9], 10, { from: admin }),
+                'ICO still active!'
+            )
 
-        //     const [ investor1, investor2, investor3 ] = [ accounts[1], accounts[2], accounts[3] ]
-        //     const [ amount1, amount2, amount3 ] = [ 250, 170, 40 ]
+            const [ investor1, investor2, investor3 ] = [ accounts[1], accounts[2], accounts[3] ]
+            const [ amount1, amount2, amount3 ] = [ 250, 170, 40 ]
 
-        //     await ico.addToWhitelist(investor1, { from: admin })
-        //     await ico.addToWhitelist(investor2, { from: admin })
-        //     await ico.addToWhitelist(investor3, { from: admin })
+            await ico.addToWhitelist(investor1, { from: admin })
+            await ico.addToWhitelist(investor2, { from: admin })
+            await ico.addToWhitelist(investor3, { from: admin })
             
-        //     await ico.buy(amount1, { from: investor1, value: 500 })
-        //     await ico.buy(amount2, { from: investor2, value: 340 })
-        //     await ico.buy(amount3, { from: investor3, value: 80 })
+            await ico.buy(amount1, { from: investor1, value: 500 })
+            await ico.buy(amount2, { from: investor2, value: 340 })
+            await ico.buy(amount3, { from: investor3, value: 80 })
         
-        //     // admin release tokens
-        //     const start = parseInt((new Date()).getTime() / 1000);
-        //     time.increase(start + duration + 101)
+            // admin release tokens
+            const start = parseInt((new Date()).getTime() / 1000);
+            time.increase(start + duration + 101)
 
-        //     await expectRevert(
-        //         ico.release({ from: investor1 }),
-        //         'Only admin!'
-        //     )
+            await expectRevert(
+                ico.release({ from: investor1 }),
+                'Only admin!'
+            )
 
-        //     await ico.release({ from: admin });
-        //     const balance1 = await tokenContract.balanceOf(investor1);
-        //     const balance2 = await tokenContract.balanceOf(investor2);
-        //     const balance3 = await tokenContract.balanceOf(investor3);
-        //     assert(balance1.eq(toBN(250)))
-        //     assert(balance2.eq(toBN(170)))
-        //     assert(balance3.eq(toBN(40)))
+            await ico.release({ from: admin });
+            const balance1 = await tokenContract.balanceOf(investor1);
+            const balance2 = await tokenContract.balanceOf(investor2);
+            const balance3 = await tokenContract.balanceOf(investor3);
+            assert(balance1.eq(toBN(250)))
+            assert(balance2.eq(toBN(170)))
+            assert(balance3.eq(toBN(40)))
 
-        //     inactiveTokenAmount = await ico.availableTokens()
-        //     assert.equal(inactiveTokenAmount.toNumber(), 40)
+            inactiveTokenAmount = await ico.availableTokens()
+            assert.equal(inactiveTokenAmount.toNumber(), 40)
             
-        //     // admin withdraws ether from contract
-        //     await expectRevert(
-        //         ico.withdraw(accounts[0], 10, { from: investor1 }),
-        //         'Only admin!'
-        //     )
+            // admin withdraws ether from contract
+            await expectRevert(
+                ico.withdraw(accounts[0], 10, { from: investor1 }),
+                'Only admin!'
+            )
 
-        //    // Admin withdraw ether that was sent to the ico
-        //     const balanceContract = toBN(await web3.eth.getBalance(ico.address));
-        //     const balanceBefore = toBN(await web3.eth.getBalance(accounts[0]));
+           // Admin withdraw ether that was sent to the ico
+            const balanceContract = toBN(await web3.eth.getBalance(ico.address));
+            const balanceBefore = toBN(await web3.eth.getBalance(accounts[0]));
 
-        //     const tx = await ico.withdraw(
-        //         accounts[0], 
-        //         balanceContract, 
-        //         { from: admin, gasPrice: 1 }
-        //     );
+            const tx = await ico.withdraw(
+                accounts[0], 
+                balanceContract, 
+                { from: admin, gasPrice: 1 }
+            );
 
-        //     const gasUsed = toBN(tx.receipt.gasUsed)
-        //     const balanceAfter = toBN(await web3.eth.getBalance(accounts[0]));
-        //     assert(balanceAfter.sub(balanceBefore).add(gasUsed).eq(balanceContract));
+            const gasUsed = toBN(tx.receipt.gasUsed)
+            const balanceAfter = toBN(await web3.eth.getBalance(accounts[0]));
+            assert(balanceAfter.sub(balanceBefore).add(gasUsed).eq(balanceContract));
 
-        //     await expectRevert(
-        //         ico.withdraw(accounts[9], balanceContract, { from: admin}),
-        //         'Invalid ether input!'
-        //     )
-        // })
+            await expectRevert(
+                ico.withdraw(accounts[9], balanceContract, { from: admin}),
+                'Invalid ether input!'
+            )
+        })
     })
 })
