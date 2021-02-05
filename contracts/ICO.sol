@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 import { ERC20Token }  from './ERC20Token.sol';
 import './ICOAbstract.sol';
-import "./SafeMath.sol";
 
 contract ICO is ICOAbstract { 
-    using SafeMath for uint;
-
     constructor(
         string memory _name,
         string memory _symbol,
@@ -54,7 +51,7 @@ contract ICO is ICOAbstract {
             'Invalid purchase limit provided!'
         );
 
-        endOfICO = _duration.add(block.timestamp);
+        endOfICO = _duration + block.timestamp;
         pricePerToken = _price;
         purchaseLimit = _allowedTokens;
     }
@@ -67,14 +64,14 @@ contract ICO is ICOAbstract {
         require(_tokensAmount <= availableTokens, 'Not enough tokens for sale!');
         require(_tokensAmount <= purchaseLimit, 'Invalid token amount!');
 
-        uint requiredPrice = _tokensAmount.mul(pricePerToken);
+        uint requiredPrice = _tokensAmount * pricePerToken;
         require(msg.value >= requiredPrice, 'Not enough ether provided!');
 
         if (msg.value > requiredPrice) {
-            msg.sender.transfer(msg.value.sub(requiredPrice));
+            payable(msg.sender).transfer(msg.value - requiredPrice);
         }
 
-        availableTokens = availableTokens.sub(_tokensAmount);
+        availableTokens -= _tokensAmount;
         sales.push(Sale(msg.sender, _tokensAmount));
     }
 

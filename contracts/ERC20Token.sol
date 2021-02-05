@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.8.0;
+pragma solidity >=0.8.0 <0.9.0;
 
 import "./IERC20Token.sol";
-import "./SafeMath.sol";
 
 contract ERC20Token is ERC20Interface {
-    using SafeMath for uint;
-
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -41,8 +38,8 @@ contract ERC20Token is ERC20Interface {
     {
         require(balances[msg.sender] >= _value, "token balance too low");
 
-        balances[msg.sender] = balances[msg.sender].sub(_value);
-        balances[_to] = balances[_to].add(_value);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
 
         emit Transfer(msg.sender, _to, _value);
 
@@ -54,14 +51,14 @@ contract ERC20Token is ERC20Interface {
         address _to,
         uint _value
     ) external override notAllowed(_to) returns (bool) {
-        uint allowance = allowed[_from][msg.sender];
+        uint _allowance = allowed[_from][msg.sender];
 
-        require(allowance >= _value, "allowance too low");
+        require(_allowance >= _value, "allowance too low");
         require(balances[_from] >= _value, "token balance too low");
 
-        balances[_from] = balances[_from].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
+        balances[_from] -= _value;
+        balances[_to] += _value;
+        allowed[_from][msg.sender] -= _value;
 
         emit Transfer(_from, _to, _value);
 
@@ -85,7 +82,7 @@ contract ERC20Token is ERC20Interface {
         public
         returns (bool)
     {
-        allowed[msg.sender][_spender] = allowed[msg.sender][_spender].add(_addedValue);
+        allowed[msg.sender][_spender] += _addedValue;
 
         emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);
 
@@ -101,7 +98,7 @@ contract ERC20Token is ERC20Interface {
         if (_subtractedValue >= oldValue) {
             allowed[msg.sender][_spender] = 0;
         } else {
-            allowed[msg.sender][_spender] = oldValue.sub(_subtractedValue);
+            allowed[msg.sender][_spender] = oldValue - _subtractedValue;
         }
 
         emit Approval(msg.sender, _spender, allowed[msg.sender][_spender]);

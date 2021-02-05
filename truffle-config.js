@@ -85,15 +85,15 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: 'native',
-      settings: {
-        optimizer: {
-          enabled: true,
-          details: { yul: false },
-          runs: 200,
-        },
-        evmVersion: 'constantinople',
-      },
+      version: '0.8.0',
+      // settings: {
+      //   optimizer: {
+      //     enabled: true,
+      //     details: { yul: false },
+      //     runs: 200,
+      //   },
+      //   evmVersion: 'constantinople',
+      // },
     },
   }
 }
